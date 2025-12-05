@@ -1,5 +1,5 @@
 # Ex.No: 02 LINEAR AND POLYNOMIAL TREND ESTIMATION
-Date:
+# Date: 26/08/2025
 ### AIM:
 To Implement Linear and Polynomial Trend Estiamtion Using Python.
 
@@ -14,14 +14,95 @@ Calculate the polynomial trend values using least square method
 
 End the program
 ### PROGRAM:
-A - LINEAR TREND ESTIMATION
+```
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-B- POLYNOMIAL TREND ESTIMATION
+# Load CarDekho dataset
+file_path = "cardekho.csv"   # <-- update file path
+data = pd.read_csv(file_path)
+
+# Check dataset columns
+print(data.head())
+
+# Assuming dataset has columns: "year" and "selling_price"
+# Aggregate yearly sales (sum of selling_price per year)
+yearly_sales = data.groupby("year")["selling_price"].sum().reset_index()
+
+# Rename columns to fit trend estimation format
+yearly_sales.rename(columns={"year": "Year", "selling_price": "Sales"}, inplace=True)
+
+# Extract values
+years = yearly_sales["Year"].tolist()
+sales = yearly_sales["Sales"].tolist()
+
+# Prepare values for linear regression
+X = [i - (len(years) // 2) for i in range(len(years))]
+x2 = [i**2 for i in X]
+xy = [i * j for i, j in zip(X, sales)]
+
+n = len(years)
+b = (n * sum(xy) - sum(sales) * sum(X)) / (n * sum(x2) - (sum(X) ** 2))
+a = (sum(sales) - b * sum(X)) / n
+linear_trend = [a + b * Xi for Xi in X]
+
+# Polynomial Trend Estimation (Degree 2)
+x3 = [i**3 for i in X]
+x4 = [i**4 for i in X]
+x2y = [i * j for i, j in zip(x2, sales)]
+
+coeff = [[n, sum(X), sum(x2)],
+         [sum(X), sum(x2), sum(x3)],
+         [sum(x2), sum(x3), sum(x4)]]
+
+Y = [sum(sales), sum(xy), sum(x2y)]
+A = np.array(coeff)
+B = np.array(Y)
+
+solution = np.linalg.solve(A, B)
+a_poly, b_poly, c_poly = solution
+poly_trend = [a_poly + b_poly * Xi + c_poly * (Xi**2) for Xi in X]
+# Display trend equations
+print(f"Linear Trend: y = {a:.2f} + {b:.2f}x")
+
+# Plot results
+plt.figure(figsize=(12,6))
+plt.plot(years, sales, 'bo-', label="Actual Sales")
+plt.plot(years, linear_trend, 'k--', label="Linear Trend")
+
+plt.title("CarDekho Sales Trend Estimation")
+plt.xlabel("Year")
+plt.ylabel("Total Sales (Selling Price Sum)")
+plt.legend()
+plt.grid(True)
+plt.show()
+# Display trend equations
+print(f"Polynomial Trend: y = {a_poly:.2f} + {b_poly:.2f}x + {c_poly:.2f}x²")
+
+# Plot results
+plt.figure(figsize=(12,6))
+plt.plot(years, sales, 'bo-', label="Actual Sales")
+plt.plot(years, poly_trend, 'r-', label="Polynomial Trend")
+
+plt.title("CarDekho Sales Trend Estimation")
+plt.xlabel("Year")
+plt.ylabel("Total Sales (Selling Price Sum)")
+plt.legend()
+plt.grid(True)
+plt.show()
+````
 
 ### OUTPUT
+<img width="836" height="457" alt="image" src="https://github.com/user-attachments/assets/4b8019f5-e421-4459-84d2-80b4dfa5c60f" />
+
 A - LINEAR TREND ESTIMATION
+<img width="1243" height="706" alt="image" src="https://github.com/user-attachments/assets/818b4313-47ae-4ac5-98ec-896b75d141a4" />
+
 
 B- POLYNOMIAL TREND ESTIMATION
+<img width="1267" height="717" alt="image" src="https://github.com/user-attachments/assets/b59e6132-4c94-4124-97d5-6fed94d68f7d" />
+
 
 ### RESULT:
 Thus the python program for linear and Polynomial Trend Estiamtion has been executed successfully.
